@@ -4,12 +4,16 @@ import numpy as np
 
 
 class AverageValueMeter(meter.Meter):
-    def __init__(self):
+    def __init__(self, save_per_epoch=True):
         super(AverageValueMeter, self).__init__()
         self.reset()
         self.val = 0
+        self.save_per_epoch = save_per_epoch
 
     def add(self, value, n=1):
+        if not self.save_per_epoch:
+            self.save(value)
+
         self.val = value
         self.sum += value
         self.var += value * value
@@ -31,6 +35,11 @@ class AverageValueMeter(meter.Meter):
         return self.mean, self.std
 
     def reset(self):
+        if self.save_per_epoch:
+            self.save((self.mean, self.std))
+        else:
+            self.reset_counter()
+
         self.n = 0
         self.sum = 0.0
         self.var = 0.0

@@ -5,15 +5,18 @@ from . import meter
 
 
 class ClassErrorMeter(meter.Meter):
-    def __init__(self, topk=[1], accuracy=False):
+    def __init__(self, topk=[1], accuracy=False, save_per_epoch=True):
         super(ClassErrorMeter, self).__init__()
         self.topk = np.sort(topk)
         self.accuracy = accuracy
         self.reset()
+        self.save_per_epoch = save_per_epoch
 
     def reset(self):
         self.sum = {v: 0 for v in self.topk}
         self.n = 0
+        if not self.save_per_epoch:
+            self.reset_counter()
 
     def add(self, output, target):
         if torch.is_tensor(output):
@@ -51,4 +54,5 @@ class ClassErrorMeter(meter.Meter):
             else:
                 return float(self.sum[k]) / self.n * 100.0
         else:
-            return [self.value(k_) for k_ in self.topk]
+            values = [self.value(k_) for k_ in self.topk]
+            self.save(values)
