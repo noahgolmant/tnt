@@ -29,7 +29,7 @@ class Engine(object):
                     loss, output = state['network'](state['sample'])
                     state['output'] = output
                     state['loss'] = loss
-                    loss.backward(create_graph=self.create_graph)
+                    loss.backward(create_graph=self.create_graph, retain_graph=self.create_graph)
                     self.hook('on_forward', state)
                     # to free memory in save_for_backward
                     state['output'] = None
