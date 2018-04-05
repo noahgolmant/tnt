@@ -1,6 +1,7 @@
 class Engine(object):
-    def __init__(self):
+    def __init__(self, create_graph=False):
         self.hooks = {}
+        self.create_graph = create_graph
 
     def hook(self, name, state):
         if name in self.hooks:
@@ -28,7 +29,7 @@ class Engine(object):
                     loss, output = state['network'](state['sample'])
                     state['output'] = output
                     state['loss'] = loss
-                    loss.backward()
+                    loss.backward(create_graph=self.create_graph)
                     self.hook('on_forward', state)
                     # to free memory in save_for_backward
                     state['output'] = None
