@@ -1,7 +1,8 @@
 class Engine(object):
-    def __init__(self, create_graph=False):
+    def __init__(self, create_graph=False, update_period=1):
         self.hooks = {}
         self.create_graph = create_graph
+        self.update_period = update_period
 
     def hook(self, name, state):
         if name in self.hooks:
@@ -35,10 +36,12 @@ class Engine(object):
                     state['output'] = None
                     state['loss'] = None
                     return loss
-
-                state['optimizer'].zero_grad()
-                state['optimizer'].step(closure)
-                self.hook('on_update', state)
+                # Allows us to do larger batch sizes.
+                # Only do this every BS/MAX_BS iterations.
+                if state['t'] % self.update_period == 0:
+                    state['optimizer'].zero_grad()
+                    state['optimizer'].step(closure)
+                    self.hook('on_update', state)
                 state['t'] += 1
             state['epoch'] += 1
             self.hook('on_end_epoch', state)
