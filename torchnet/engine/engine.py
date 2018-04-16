@@ -53,18 +53,18 @@ class Engine(object):
                     state['sample'] = list(mini_sample)
                     self.hook('on_sample', state)
 
-                    def closure():
-                        loss, output = state['network'](state['sample'])
-                        state['output'] = output
-                        state['loss'] = loss
-                        loss.backward(create_graph=self.create_graph, retain_graph=self.create_graph)
-                        self.hook('on_forward', state)
-                        # to free memory in save_for_backward
-                        state['output'] = None
-                        state['loss'] = None
-                        return loss
+                    #def closure():
+                    loss, output = state['network'](state['sample'])
+                    state['output'] = output
+                    state['loss'] = loss
+                    loss.backward(create_graph=self.create_graph, retain_graph=self.create_graph)
+                    self.hook('on_forward', state)
+                    # to free memory in save_for_backward
+                    state['output'] = None
+                    state['loss'] = None
+                    #    return loss
 
-                state['optimizer'].step(closure, scaling_factor=len(mini_inputs), grad_clip=5.)
+                state['optimizer'].step(None, scaling_factor=len(mini_inputs), grad_clip=5.)
                 self.hook('on_update', state)
 
                 state['t'] += 1
@@ -83,13 +83,13 @@ class Engine(object):
 
         self.hook('on_start', state)
         for sample in state['iterator']:
-            inputs = Variable(sample[0]) #Variable(cast(sample[0], 'float'))
-            targets = Variable(sample[1]) #Variable(cast(sample[1], 'long'))
+            inputs = Variable(cast(sample[0], 'float'))
+            targets = Variable(cast(sample[1], 'long'))
 
             sample[0] = inputs
             sample[1] = targets
 
-            state['sample'] = (inputs, targets)
+            state['sample'] = sample
             self.hook('on_sample', state)
 
             def closure():
