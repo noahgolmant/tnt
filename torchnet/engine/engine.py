@@ -46,7 +46,7 @@ class Engine(object):
 
                 state['optimizer'].zero_grad()
                 for k, mini_sample in enumerate(mini_samples):
-                    state['sample'] = mini_sample
+                    state['sample'] = list(mini_sample)
                     self.hook('on_sample', state)
 
                     def closure():
