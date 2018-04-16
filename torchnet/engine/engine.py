@@ -1,4 +1,13 @@
+import torch
 from torch.autograd import Variable
+
+
+def cast(params, dtype='float'):
+    if isinstance(params, dict):
+        return {k: cast(v, dtype) for k, v in params.items()}
+    else:
+        return getattr(params.cuda() if torch.cuda.is_available() else params, dtype)()
+
 
 class Engine(object):
     def __init__(self, create_graph=False, mini_batch_size=-1):
