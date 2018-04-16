@@ -1,5 +1,5 @@
 import torch
-from torch.autograd import Variabl
+from torch.autograd import Variable
 import logging
 
 
