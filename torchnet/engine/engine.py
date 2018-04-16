@@ -1,5 +1,6 @@
 import torch
-from torch.autograd import Variable
+from torch.autograd import Variabl
+import logging
 
 
 def cast(params, dtype='float'):
@@ -38,6 +39,9 @@ class Engine(object):
                 targets = Variable(cast(sample[1], 'long'))
 
                 batch_size = len(inputs)
+                if batch_size % self.mini_batch_size != 0:
+                    logging.info("Can't evenly divide this mini-batch!")
+                    continue
 
                 # Chunk into equally sized mini-batches for batch size statistics
                 mini_inputs = inputs.chunk(batch_size // self.mini_batch_size)
