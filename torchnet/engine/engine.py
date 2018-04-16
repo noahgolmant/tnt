@@ -83,7 +83,7 @@ class Engine(object):
 
         self.hook('on_start', state)
         for sample in state['iterator']:
-            inputs = Variable(cast(sample[0], 'float'))
+            inputs = Variable(cast(sample[0], 'float'), volatile=True)
             targets = Variable(cast(sample[1], 'long'))
 
             sample[0] = inputs
