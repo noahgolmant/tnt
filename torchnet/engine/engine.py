@@ -79,19 +79,29 @@ class Engine(object):
 
         self.hook('on_start', state)
         for sample in state['iterator']:
-            state['sample'] = sample
-            self.hook('on_sample', state)
+            inputs = Variable(cast(sample[0], 'float'))
+            targets = Variable(cast(sample[1], 'long'))
 
-            def closure():
-                loss, output = state['network'](state['sample'])
-                state['output'] = output
-                state['loss'] = loss
-                self.hook('on_forward', state)
-                # to free memory in save_for_backward
-                state['output'] = None
-                state['loss'] = None
+            batch_size = len(inputs)
 
-            closure()
+            # Chunk into equally sized mini-batches for batch size statistics
+            mini_inputs = inputs.chunk(batch_size // self.mini_batch_size)
+            mini_targets = targets.chunk(batch_size // self.mini_batch_size)
+            mini_samples = zip(mini_inputs, mini_targets)
+            for k, mini_sample in enumerate(mini_samples):
+                state['sample'] = list(mini_sample)
+                self.hook('on_sample', state)
+
+                def closure():
+                    loss, output = state['network'](state['sample'])
+                    state['output'] = output
+                    state['loss'] = loss
+                    self.hook('on_forward', state)
+                    # to free memory in save_for_backward
+                    state['output'] = None
+                    state['loss'] = None
+
+                closure()
             state['t'] += 1
         self.hook('on_end', state)
         return state
