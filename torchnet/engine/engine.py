@@ -1,3 +1,5 @@
+from torch.autograd import Variable
+
 class Engine(object):
     def __init__(self, create_graph=False, mini_batch_size=-1):
         self.hooks = {}
